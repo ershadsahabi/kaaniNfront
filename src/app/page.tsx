@@ -1,95 +1,59 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+import { getPublicProducts } from '@/lib/serverApi'
 
-export default function Home() {
+export default async function HomePage() {
+  let products: any[] = []
+  try {
+    const data = await getPublicProducts(8)
+    products = data.results || data
+  } catch (error) {
+    console.error('Error fetching products for homepage:', error)
+  }
+
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>src/app/page.tsx</code>.
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <section className="py-12 bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4">
+        <h1 className="text-4xl font-extrabold text-center mb-10 text-gray-800">
+          محصولات
+        </h1>
 
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+        {products.length === 0 ? (
+          <p className="text-center text-gray-500 text-lg">
+            هیچ محصولی یافت نشد.
+          </p>
+        ) : (
+          <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {products.map((product) => (
+              <li
+                key={product.id}
+                className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow overflow-hidden flex flex-col"
+              >
+                {product.image_url && (
+                  <div className="w-full overflow-hidden">
+                    <img
+                      src={product.image_url}
+                      alt={product.name}
+                      className="w-full max-h-48 object-cover transition-transform duration-300 hover:scale-105"
+                      style={{ height: '192px' }} // 48 * 4 = 192 px ارتفاع ثابت
+                    />
+                  </div>
+                )}
+
+                <div className="p-5 flex flex-col flex-grow">
+                  <h2 className="font-bold text-lg text-gray-800 mb-2 line-clamp-1">
+                    {product.name}
+                  </h2>
+                  <p className="text-sm text-gray-500 flex-grow line-clamp-2 mb-4">
+                    {product.description || 'بدون توضیحات'}
+                  </p>
+                  <p className="text-base font-semibold text-indigo-600">
+                    {product.price?.toLocaleString()} تومان
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </section>
+  )
 }

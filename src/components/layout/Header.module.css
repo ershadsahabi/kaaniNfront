@@ -1,0 +1,11 @@
+/* src/components/layout/Header.module.css */
+.header { background: var(--surface); border-bottom: 1px solid rgba(0,0,0,0.04); }
+.inner { max-width: var(--container-width); margin-inline: auto; padding: 12px 24px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.brand { font-weight:700; font-size:18px; }
+.nav { display:flex; gap:16px; align-items:center; }
+.burger { display:none; background:none; border:none; font-size:20px; }
+@media (max-width: 720px) {
+  .nav { display:none; position:absolute; right:0; left:0; top:56px; background:var(--surface); padding:12px; flex-direction:column; }
+  .nav.open { display:flex; }
+  .burger { display:block; }
+}
