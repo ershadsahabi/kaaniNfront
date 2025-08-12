@@ -1,43 +1,53 @@
 // src/components/layout/Sidebar.client.tsx
-'use client'
+'use client';
 
-import React, { useEffect, useRef } from 'react'
-import Link from 'next/link'
+import React, { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 
 type Props = {
-  open: boolean
-  onClose: () => void
-}
+  defaultOpen?: boolean; // مقدار اولیه هنگام SSR
+  onClose?: () => void;
+};
 
-export default function Sidebar({ open, onClose }: Props) {
-  const containerRef = useRef<HTMLDivElement | null>(null)
+export default function Sidebar({ defaultOpen = true, onClose }: Props) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [open, setOpen] = useState(defaultOpen);
 
-  // close on Escape
+  // همگام‌سازی با عرض صفحه بعد از mount (برای موبایل و دسکتاپ)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setOpen(window.innerWidth >= 900);
+    }
+  }, []);
+
+  // بستن با دکمه Escape
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') onClose()
+      if (e.key === 'Escape') {
+        setOpen(false);
+        onClose?.();
+      }
     }
-    if (open) window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [open, onClose])
+    if (open) window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open, onClose]);
 
-  // focus first link when opened (mobile)
-useEffect(() => {
-  if (open && typeof window !== 'undefined') {
-    const firstAnchor = containerRef.current?.querySelector('a')
-    if (firstAnchor instanceof HTMLElement) {
-      firstAnchor.focus()
+  // فوکوس روی اولین لینک بعد از باز شدن
+  useEffect(() => {
+    if (open && typeof window !== 'undefined') {
+      const firstAnchor = containerRef.current?.querySelector('a');
+      if (firstAnchor instanceof HTMLElement) {
+        firstAnchor.focus();
+      }
     }
-  }
-}, [open])
-
+  }, [open]);
 
   return (
     <aside
       id="app-sidebar"
-      className="app-aside"
+      className={`app-aside ${open ? 'open' : 'closed'}`}
       ref={containerRef}
-      aria-hidden={!open && typeof window !== 'undefined' && window.innerWidth < 900}
+      aria-hidden={!open}
     >
       <nav className="aside-nav" aria-label="ناوبری اصلی">
         <Link href="/dashboard" className="aside-link">🏠 داشبورد</Link>
@@ -48,11 +58,11 @@ useEffect(() => {
         <Link href="/suppliers" className="aside-link">🏷️ تأمین‌کنندگان</Link>
         <Link href="/notifications" className="aside-link">🔔 اعلان‌ها</Link>
 
-        <hr style={{ margin: '8px 0', border: 'none', height: 1, background: 'rgba(0,0,0,0.04)' }} />
+        <hr className="aside-divider" />
 
         <Link href="/settings" className="aside-link">⚙️ تنظیمات</Link>
         <Link href="/help" className="aside-link">❓ راهنما</Link>
       </nav>
     </aside>
-  )
+  );
 }
